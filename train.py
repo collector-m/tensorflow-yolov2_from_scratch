@@ -17,7 +17,7 @@ from core import backbone, utils
 from core.dataset import dataset, parser
 
 WARM_UP_BATCHES  = 0
-BATCH_SIZE       = 1
+BATCH_SIZE       = 8
 EPOCHS           = 250 * 1000
 LR               = .5e-4
 GRID_H , GRID_W  = 13, 13
@@ -27,7 +27,7 @@ NUM_ANCHORS      = len(ANCHORS) // 2
 CLASSES          = [ cls.strip('\n') for cls in open("./data/voc.names").readlines()]
 NUM_CLASSES      = len(CLASSES)
 CLASS_WEIGHTS    = np.ones(NUM_CLASSES, dtype='float32')
-TRUE_BOX_BUFFER  = 50
+TRUE_BOX_BUFFER  = 20
 
 tfrecord = "../voc/voc.tfrecords"
 sess = tf.Session()
@@ -82,7 +82,7 @@ for epoch in range(EPOCHS):
     writer_train.add_summary(summary, global_step=epoch)
     writer_train.flush()
 
-    _, summary = sess.run([loss_items, write_op], feed_dict={is_training:True})
+    _, summary = sess.run([loss_items, write_op], feed_dict={is_training:False})
     writer_val.add_summary(summary, global_step=epoch)
     writer_val.flush()
 
