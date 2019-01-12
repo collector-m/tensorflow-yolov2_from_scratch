@@ -17,7 +17,7 @@ from core import backbone, utils
 from core.dataset import dataset, parser
 
 WARM_UP_BATCHES  = 0
-BATCH_SIZE       = 8
+BATCH_SIZE       = 1
 EPOCHS           = 250 * 1000
 LR               = .5e-4
 GRID_H , GRID_W  = 13, 13
@@ -48,7 +48,7 @@ output = tf.keras.layers.Conv2D(NUM_ANCHORS * (5 + NUM_CLASSES),
                 (1,1), strides=(1,1),
                 padding='same',
                 name='detection_layer',
-                kernel_initializer='lecun_normal')(features)
+                kernel_initializer='he_normal')(features)
 y_pred = tf.reshape(output, shape=[BATCH_SIZE, GRID_H, GRID_W, NUM_ANCHORS, 5+NUM_CLASSES])
 
 loss_items = utils.compute_loss(y_true, y_pred, true_boxes, GRID_H, GRID_W, BATCH_SIZE, ANCHORS, CLASS_WEIGHTS)
