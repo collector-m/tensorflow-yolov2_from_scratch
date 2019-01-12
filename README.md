@@ -1,2 +1,2 @@
-# tensorflow-yolov2_from_scratch
-超级详细的yolov2算法讲解
+# tensorflow-yolov2
+yolov2
