@@ -39,7 +39,7 @@ iterator = dataset.make_one_shot_iterator()
 example = iterator.get_next()
 input_image, y_true, true_boxes = example
 
-feature_extractor = backbone.FullYoloFeature(input_image)
+feature_extractor = backbone.FullYoloFeature(input_image, is_training=True)
 features = feature_extractor.feature
 
 output = tf.keras.layers.Conv2D(NUM_ANCHORS * (5 + NUM_CLASSES),
@@ -51,11 +51,12 @@ y_pred = tf.reshape(output, shape=[BATCH_SIZE, GRID_H, GRID_W, NUM_ANCHORS, 5+NU
 
 loss_items = utils.compute_loss(y_true, y_pred, true_boxes, GRID_H, GRID_W, BATCH_SIZE, ANCHORS, CLASS_WEIGHTS)
 optimizer = tf.train.MomentumOptimizer(LR, momentum=0.9)
-train_op = optimizer.minimize(loss_items[0])
+
+update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+with tf.control_dependencies(update_op):
+    train_op = optimizer.minimize(loss_items[0])
 
 saver = tf.train.Saver(max_to_keep=2)
-write_op = tf.summary.merge_all()
-writer_train = tf.summary.FileWriter("./data/log")
 
 tf.summary.scalar("loss/loss_xy",      loss_items[1])
 tf.summary.scalar("loss/loss_wh",      loss_items[2])
@@ -65,6 +66,8 @@ tf.summary.scalar("yolov2/total_loss", loss_items[0])
 tf.summary.scalar("yolov2/recall_50",  loss_items[5])
 tf.summary.scalar("yolov2/recall_75",  loss_items[6])
 
+write_op = tf.summary.merge_all()
+writer_train = tf.summary.FileWriter("./data/log")
 
 sess.run(tf.global_variables_initializer())
 for epoch in range(EPOCHS):
@@ -72,8 +75,7 @@ for epoch in range(EPOCHS):
     writer_train.add_summary(summary, global_step=epoch)
     writer_train.flush()
     print("=> epoch %d" %epoch)
-    # if epoch % 2000 == 0: saver.save(sess, save_path="./data/checkpoint/yolov2.ckpt", global_step=epoch)
-    saver.save(sess, save_path="./data/checkpoint/yolov2.ckpt", global_step=epoch)
+    if epoch % 2000 == 0: saver.save(sess, save_path="./data/checkpoint/yolov2.ckpt", global_step=epoch)
 
 
 
