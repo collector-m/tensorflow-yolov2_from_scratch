@@ -14,11 +14,12 @@
 import numpy as np
 import tensorflow as tf
 from core import backbone, utils
+from core.dataset import dataset, parser
 
 WARM_UP_BATCHES  = 0
 BATCH_SIZE       = 1
 EPOCHS           = 250 * 1000
-LR               = .5e-3
+LR               = .1e-5
 GRID_H , GRID_W  = 13, 13
 IMAGE_H, IMAGE_W = 416, 416
 ANCHORS          = [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828]
@@ -31,13 +32,19 @@ TRUE_BOX_BUFFER  = 50
 tfrecord = "../voc/voc.tfrecords"
 sess = tf.Session()
 
-paser = utils.parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, DEBUG=False)
-dataset = tf.data.TFRecordDataset(filenames = tf.gfile.Glob(tfrecord))
-dataset = dataset.map(paser.parser_example, num_parallel_calls = 10)
-dataset = dataset.repeat().shuffle(1).batch(BATCH_SIZE).prefetch(BATCH_SIZE)
-iterator = dataset.make_one_shot_iterator()
-example = iterator.get_next()
-input_image, y_true, true_boxes = example
+parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, DEBUG=False)
+
+trainset = dataset(parser, tfrecord, BATCH_SIZE, shuffle=1)
+
+
+# dataset = tf.data.TFRecordDataset(filenames = tf.gfile.Glob(tfrecord))
+# dataset = dataset.map(paser.parser_example, num_parallel_calls = 10)
+# dataset = dataset.repeat().shuffle(1).batch(BATCH_SIZE).prefetch(BATCH_SIZE)
+# iterator = dataset.make_one_shot_iterator()
+# example = iterator.get_next()
+
+
+input_image, y_true, true_boxes = trainset.get_next()
 
 feature_extractor = backbone.FullYoloFeature(input_image, is_training=True)
 features = feature_extractor.feature
