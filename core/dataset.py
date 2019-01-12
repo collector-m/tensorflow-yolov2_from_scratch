@@ -44,7 +44,7 @@ class parser(object):
             serialized_example,
             features = {
                 'image' : tf.FixedLenFeature([], dtype = tf.string),
-                'boxes': tf.FixedLenFeature([], dtype = tf.string),
+                'boxes' : tf.FixedLenFeature([], dtype = tf.string),
             }
         )
 
@@ -102,6 +102,8 @@ class parser(object):
                 b_batch[0, 0, 0, i] = box
 
         return y_batch, b_batch
+
+
 
 class dataset(object):
     def __init__(self, parser, tfrecords_path, batch_size, shuffle=None):

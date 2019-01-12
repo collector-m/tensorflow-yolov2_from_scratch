@@ -19,7 +19,7 @@ from core.dataset import dataset, parser
 WARM_UP_BATCHES  = 0
 BATCH_SIZE       = 1
 EPOCHS           = 250 * 1000
-LR               = .1e-5
+LR               = .5e-4
 GRID_H , GRID_W  = 13, 13
 IMAGE_H, IMAGE_W = 416, 416
 ANCHORS          = [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828]
@@ -52,7 +52,8 @@ output = tf.keras.layers.Conv2D(NUM_ANCHORS * (5 + NUM_CLASSES),
 y_pred = tf.reshape(output, shape=[BATCH_SIZE, GRID_H, GRID_W, NUM_ANCHORS, 5+NUM_CLASSES])
 
 loss_items = utils.compute_loss(y_true, y_pred, true_boxes, GRID_H, GRID_W, BATCH_SIZE, ANCHORS, CLASS_WEIGHTS)
-optimizer = tf.train.MomentumOptimizer(LR, momentum=0.9)
+# optimizer = tf.train.MomentumOptimizer(LR, momentum=0.9)
+optimizer = tf.train.AdamOptimizer(LR)
 
 update_op = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 with tf.control_dependencies(update_op):
