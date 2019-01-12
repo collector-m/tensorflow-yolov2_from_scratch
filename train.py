@@ -35,18 +35,13 @@ sess = tf.Session()
 parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, DEBUG=False)
 
 trainset = dataset(parser, tfrecord, BATCH_SIZE, shuffle=1)
+valset   = dataset(parser, tfrecord, BATCH_SIZE, shuffle=None)
 
+is_training = tf.placeholder(tf.bool)
+example = tf.cond(is_training, lambda: trainset.get_next(), lambda: valset.get_next())
+input_image, y_true, true_boxes = example
 
-# dataset = tf.data.TFRecordDataset(filenames = tf.gfile.Glob(tfrecord))
-# dataset = dataset.map(paser.parser_example, num_parallel_calls = 10)
-# dataset = dataset.repeat().shuffle(1).batch(BATCH_SIZE).prefetch(BATCH_SIZE)
-# iterator = dataset.make_one_shot_iterator()
-# example = iterator.get_next()
-
-
-input_image, y_true, true_boxes = trainset.get_next()
-
-feature_extractor = backbone.FullYoloFeature(input_image, is_training=True)
+feature_extractor = backbone.FullYoloFeature(input_image, is_training)
 features = feature_extractor.feature
 
 output = tf.keras.layers.Conv2D(NUM_ANCHORS * (5 + NUM_CLASSES),
@@ -72,16 +67,24 @@ tf.summary.scalar("loss/loss_class",   loss_items[4])
 tf.summary.scalar("yolov2/total_loss", loss_items[0])
 tf.summary.scalar("yolov2/recall_50",  loss_items[5])
 tf.summary.scalar("yolov2/recall_75",  loss_items[6])
+tf.summary.scalar("yolov2/avg_iou",    loss_items[7])
 
 write_op = tf.summary.merge_all()
-writer_train = tf.summary.FileWriter("./data/log")
+writer_train = tf.summary.FileWriter("./data/train")
+writer_val   = tf.summary.FileWriter("./data/val")
 
 sess.run(tf.global_variables_initializer())
 for epoch in range(EPOCHS):
-    _, summary = sess.run([train_op, write_op])
+    print("========================> epoch %08d <========================" %epoch)
+
+    _, summary = sess.run([train_op, write_op], feed_dict={is_training:True})
     writer_train.add_summary(summary, global_step=epoch)
     writer_train.flush()
-    print("=> epoch %d" %epoch)
+
+    _, summary = sess.run([loss_items, write_op], feed_dict={is_training:True})
+    writer_val.add_summary(summary, global_step=epoch)
+    writer_val.flush()
+
     if epoch % 2000 == 0: saver.save(sess, save_path="./data/checkpoint/yolov2.ckpt", global_step=epoch)
 
 

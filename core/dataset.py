@@ -68,7 +68,7 @@ class parser(object):
 
         for i in range(len(gt_boxes)):
             box = gt_boxes[i]
-            print(box)
+            # print(box)
             center_x = .5 * (box[0] + box[2])
             center_x = center_x / (float(self.IMAGE_W) / self.GRID_W) # uint: grid cell
             center_y = .5 * (box[1] + box[3])

@@ -144,6 +144,7 @@ def compute_loss(y_true, y_pred, true_boxes, grid_h, grid_w, batch_size, anchors
     nb_coord_box = tf.reduce_sum(tf.to_float(coord_mask > 0.0))
     nb_conf_box  = tf.reduce_sum(tf.to_float(conf_mask  > 0.0))
     nb_class_box = tf.reduce_sum(tf.to_float(class_mask > 0.0))
+    nb_iou_box   = tf.reduce_sum(best_ious * tf.to_float(y_true[..., 4] > 0.0))
 
     loss_xy    = tf.reduce_sum(tf.square(true_box_xy-pred_box_xy)     * coord_mask) / (nb_coord_box + 1e-6) / 2.
     loss_wh    = tf.reduce_sum(tf.square(true_box_wh-pred_box_wh)     * coord_mask) / (nb_coord_box + 1e-6) / 2.
@@ -161,6 +162,7 @@ def compute_loss(y_true, y_pred, true_boxes, grid_h, grid_w, batch_size, anchors
     """
     recall_50 = nb_pred_50 / (nb_true_box + 1e-6)
     recall_75 = nb_pred_75 / (nb_true_box + 1e-6)
+    avg_iou   = nb_iou_box / (nb_true_box + 1e-6)
     """
     Debugging code
     """
@@ -171,8 +173,9 @@ def compute_loss(y_true, y_pred, true_boxes, grid_h, grid_w, batch_size, anchors
     total_loss = tf.Print(total_loss, [total_loss],  message='total loss  =\t', summarize=1000)
     total_loss = tf.Print(total_loss, [recall_50],   message='recall_50   =\t', summarize=1000)
     total_loss = tf.Print(total_loss, [recall_75],   message='recall_75   =\t', summarize=1000)
+    total_loss = tf.Print(total_loss, [avg_iou],     message='avg_iou     =\t', summarize=1000)
 
-    return total_loss, loss_xy, loss_wh, loss_conf, loss_class, recall_50, recall_75
+    return total_loss, loss_xy, loss_wh, loss_conf, loss_class, recall_50, recall_75, avg_iou
 
 
 
