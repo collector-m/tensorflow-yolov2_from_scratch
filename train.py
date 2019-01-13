@@ -29,13 +29,14 @@ NUM_CLASSES      = len(CLASSES)
 CLASS_WEIGHTS    = np.ones(NUM_CLASSES, dtype='float32')
 TRUE_BOX_BUFFER  = 20
 
-tfrecord = "../voc/voc.tfrecords"
+train_tfrecord = "../voc/train*.tfrecords"
+val_tfrecord   = "../voc/val*.tfrecords"
 sess = tf.Session()
 
 parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, DEBUG=False)
 
-trainset = dataset(parser, tfrecord, BATCH_SIZE, shuffle=1)
-valset   = dataset(parser, tfrecord, BATCH_SIZE, shuffle=None)
+trainset = dataset(parser, train_tfrecord, BATCH_SIZE, shuffle=1)
+valset   = dataset(parser, val_tfrecord,   BATCH_SIZE, shuffle=None)
 
 is_training = tf.placeholder(tf.bool)
 example = tf.cond(is_training, lambda: trainset.get_next(), lambda: valset.get_next())
@@ -67,10 +68,6 @@ output = tf.nn.bias_add(output, biases)
 
 
 y_pred = tf.reshape(output, shape=[BATCH_SIZE, GRID_H, GRID_W, NUM_ANCHORS, 5+NUM_CLASSES])
-
-
-
-
 
 loss_items = utils.compute_loss(y_true, y_pred, true_boxes, GRID_H, GRID_W, BATCH_SIZE, ANCHORS, CLASS_WEIGHTS)
 # optimizer = tf.train.MomentumOptimizer(LR, momentum=0.9)
