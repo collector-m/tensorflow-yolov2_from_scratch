@@ -17,7 +17,7 @@ from core import backbone, utils
 from core.dataset import dataset, parser
 
 WARM_UP_BATCHES  = 0
-BATCH_SIZE       = 1
+BATCH_SIZE       = 8
 EPOCHS           = 250 * 1000
 LR               = .5e-4
 GRID_H , GRID_W  = 13, 13

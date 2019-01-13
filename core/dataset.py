@@ -68,7 +68,6 @@ class parser(object):
 
         for i in range(len(gt_boxes)):
             box = gt_boxes[i]
-            # print(box)
             center_x = .5 * (box[0] + box[2])
             center_x = center_x / (float(self.IMAGE_W) / self.GRID_W) # uint: grid cell
             center_y = .5 * (box[1] + box[3])
@@ -96,10 +95,6 @@ class parser(object):
                 iou = intersect_area / (box_area + anchors_area - intersect_area + 1e-6)
                 best_anchor = np.argmax(iou)
 
-                print(grid_y, grid_x, )
-                print("=> best_anchor", best_anchor)
-                print("=> max iou", np.max(iou))
-                print("=> box", box)
                 y_batch[grid_y, grid_x, best_anchor, 0:4      ] = box
                 y_batch[grid_y, grid_x, best_anchor, 4        ] = 1.
                 y_batch[grid_y, grid_x, best_anchor, 5+cls_idx] = 1.
