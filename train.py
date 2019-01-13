@@ -29,8 +29,7 @@ NUM_CLASSES      = len(CLASSES)
 CLASS_WEIGHTS    = np.ones(NUM_CLASSES, dtype='float32')
 TRUE_BOX_BUFFER  = 20
 
-# tfrecord = "../voc/voc.tfrecords"
-tfrecord = "./test0003.tfrecords"
+tfrecord = "../voc/voc.tfrecords"
 sess = tf.Session()
 
 parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, DEBUG=False)
@@ -45,21 +44,24 @@ input_image, y_true, true_boxes = example
 feature_extractor = backbone.FullYoloFeature(input_image, is_training)
 features = feature_extractor.feature
 
-# => method 1
+# ========================> method 1 <================================
+
 # output = tf.keras.layers.Conv2D(NUM_ANCHORS * (5 + NUM_CLASSES),
                 # (1,1), strides=(1,1),
                 # padding='same',
                 # name='detection_layer',
                 # kernel_initializer='he_normal')(features)
-# => method 2
-filter_weight = tf.get_variable('weight', [1, 1, 3, NUM_ANCHORS*(5+NUM_CLASSES)],
+
+# ========================> method 2 <================================
+
+input_num_filter = features.shape[-1].value
+filter_weight = tf.get_variable('weight', [1, 1, input_num_filter, NUM_ANCHORS*(5+NUM_CLASSES)],
                                 initializer=tf.truncated_normal_initializer(stddev=0.1))
 filter_weight = filter_weight / (GRID_H*GRID_W)
 
 biases = tf.get_variable('biases', [NUM_ANCHORS*(5+NUM_CLASSES)],
                          initializer=tf.truncated_normal_initializer(stddev=0.1))
 biases = biases / (GRID_H*GRID_W)
-
 output = tf.nn.conv2d(features, filter_weight, strides=[1, 1, 1, 1], padding='SAME')
 output = tf.nn.bias_add(output, biases)
 
