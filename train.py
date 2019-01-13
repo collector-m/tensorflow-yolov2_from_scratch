@@ -29,7 +29,8 @@ NUM_CLASSES      = len(CLASSES)
 CLASS_WEIGHTS    = np.ones(NUM_CLASSES, dtype='float32')
 TRUE_BOX_BUFFER  = 20
 
-tfrecord = "../voc/voc.tfrecords"
+# tfrecord = "../voc/voc.tfrecords"
+tfrecord = "./test0003.tfrecords"
 sess = tf.Session()
 
 parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, DEBUG=False)
@@ -44,12 +45,30 @@ input_image, y_true, true_boxes = example
 feature_extractor = backbone.FullYoloFeature(input_image, is_training)
 features = feature_extractor.feature
 
-output = tf.keras.layers.Conv2D(NUM_ANCHORS * (5 + NUM_CLASSES),
-                (1,1), strides=(1,1),
-                padding='same',
-                name='detection_layer',
-                kernel_initializer='he_normal')(features)
+# => method 1
+# output = tf.keras.layers.Conv2D(NUM_ANCHORS * (5 + NUM_CLASSES),
+                # (1,1), strides=(1,1),
+                # padding='same',
+                # name='detection_layer',
+                # kernel_initializer='he_normal')(features)
+# => method 2
+filter_weight = tf.get_variable('weight', [1, 1, 3, NUM_ANCHORS*(5+NUM_CLASSES)],
+                                initializer=tf.truncated_normal_initializer(stddev=0.1))
+filter_weight = filter_weight / (GRID_H*GRID_W)
+
+biases = tf.get_variable('biases', [NUM_ANCHORS*(5+NUM_CLASSES)],
+                         initializer=tf.truncated_normal_initializer(stddev=0.1))
+biases = biases / (GRID_H*GRID_W)
+
+output = tf.nn.conv2d(features, filter_weight, strides=[1, 1, 1, 1], padding='SAME')
+output = tf.nn.bias_add(output, biases)
+
+
 y_pred = tf.reshape(output, shape=[BATCH_SIZE, GRID_H, GRID_W, NUM_ANCHORS, 5+NUM_CLASSES])
+
+
+
+
 
 loss_items = utils.compute_loss(y_true, y_pred, true_boxes, GRID_H, GRID_W, BATCH_SIZE, ANCHORS, CLASS_WEIGHTS)
 # optimizer = tf.train.MomentumOptimizer(LR, momentum=0.9)
@@ -82,9 +101,9 @@ for epoch in range(EPOCHS):
     writer_train.add_summary(summary, global_step=epoch)
     writer_train.flush()
 
-    _, summary = sess.run([loss_items, write_op], feed_dict={is_training:False})
-    writer_val.add_summary(summary, global_step=epoch)
-    writer_val.flush()
+    # _, summary = sess.run([loss_items, write_op], feed_dict={is_training:False})
+    # writer_val.add_summary(summary, global_step=epoch)
+    # writer_val.flush()
 
     if epoch % 2000 == 0: saver.save(sess, save_path="./data/checkpoint/yolov2.ckpt", global_step=epoch)
 
