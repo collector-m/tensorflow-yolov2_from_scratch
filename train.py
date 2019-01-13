@@ -27,7 +27,7 @@ NUM_ANCHORS      = len(ANCHORS) // 2
 CLASSES          = [ cls.strip('\n') for cls in open("./data/voc.names").readlines()]
 NUM_CLASSES      = len(CLASSES)
 CLASS_WEIGHTS    = np.ones(NUM_CLASSES, dtype='float32')
-TRUE_BOX_BUFFER  = 20
+TRUE_BOX_BUFFER  = 80
 
 train_tfrecord = "../voc/train*.tfrecords"
 val_tfrecord   = "../voc/val*.tfrecords"
