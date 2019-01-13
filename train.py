@@ -100,9 +100,9 @@ for epoch in range(EPOCHS):
     writer_train.add_summary(summary, global_step=epoch)
     writer_train.flush()
 
-    # _, summary = sess.run([loss_items, write_op], feed_dict={is_training:False})
-    # writer_val.add_summary(summary, global_step=epoch)
-    # writer_val.flush()
+    _, summary = sess.run([loss_items, write_op], feed_dict={is_training:False})
+    writer_val.add_summary(summary, global_step=epoch)
+    writer_val.flush()
 
     if epoch % 2000 == 0: saver.save(sess, save_path="./data/checkpoint/yolov2.ckpt", global_step=epoch)
 
