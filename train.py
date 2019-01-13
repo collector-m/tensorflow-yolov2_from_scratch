@@ -32,8 +32,7 @@ TRUE_BOX_BUFFER  = 80
 train_tfrecord = "../voc/train*.tfrecords"
 val_tfrecord   = "../voc/val*.tfrecords"
 sess = tf.Session()
-
-parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, DEBUG=False)
+parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, TRUE_BOX_BUFFER, DEBUG=False)
 
 trainset = dataset(parser, train_tfrecord, BATCH_SIZE, shuffle=1)
 valset   = dataset(parser, val_tfrecord,   BATCH_SIZE, shuffle=None)
