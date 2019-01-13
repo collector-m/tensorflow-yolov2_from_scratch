@@ -108,6 +108,7 @@ def draw_boxes(image, boxes, labels):
                     cv2.FONT_HERSHEY_SIMPLEX,
                     1e-3 * image_h,
                     (0,255,0), 2)
+        print("=> %s" %labels[box.get_label()] + ' ' + str(box.get_score()))
 
     return image
 

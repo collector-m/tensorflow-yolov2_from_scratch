@@ -29,14 +29,14 @@ NUM_CLASSES      = len(CLASSES)
 CLASS_WEIGHTS    = np.ones(NUM_CLASSES, dtype='float32')
 TRUE_BOX_BUFFER  = 80
 
-test_tfrecord = "./test_data/train0003.tfrecords"
+# test_tfrecord = "./test_data/train0003.tfrecords"
 train_tfrecord = "../voc/train*.tfrecords"
 val_tfrecord   = "../voc/val*.tfrecords"
 sess = tf.Session()
 parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, TRUE_BOX_BUFFER, DEBUG=False)
 
-trainset = dataset(parser, test_tfrecord, BATCH_SIZE, shuffle=1)
-valset   = dataset(parser, test_tfrecord,   BATCH_SIZE, shuffle=None)
+trainset = dataset(parser, train_tfrecord, BATCH_SIZE, shuffle=1)
+valset   = dataset(parser, val_tfrecord,   BATCH_SIZE, shuffle=None)
 
 is_training = tf.placeholder(tf.bool)
 example = tf.cond(is_training, lambda: trainset.get_next(), lambda: valset.get_next())

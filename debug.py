@@ -30,7 +30,7 @@ NUM_CLASSES      = len(CLASSES)
 CLASS_WEIGHTS    = np.ones(NUM_CLASSES, dtype='float32')
 TRUE_BOX_BUFFER  = 20
 
-tfrecord = "../voc/voc.tfrecords"
+tfrecord = "./test_data/train0003.tfrecords"
 sess = tf.Session()
 
 parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, DEBUG=True)
@@ -40,7 +40,7 @@ trainset = dataset(parser, tfrecord, BATCH_SIZE, shuffle=1)
 example = trainset.get_next()
 
 
-for l in range(10):
+for l in range(2):
     image, boxes = sess.run(example)
     image, boxes = image[0], boxes[0]
 

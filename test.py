@@ -17,7 +17,7 @@ import cv2
 import tensorflow as tf
 sess = tf.Session()
 
-image_path = "./VOC/2008_003405.jpg"
+image_path = "./2008_003414.jpg"
 
 input_image = tf.placeholder(tf.float32, [1, 416, 416, 3])
 input_image = input_image / 255.
