@@ -17,7 +17,7 @@ import cv2
 import tensorflow as tf
 sess = tf.Session()
 
-image_path = "./VOC/2008_003402.jpg"
+image_path = "./VOC/2008_003405.jpg"
 
 input_image = tf.placeholder(tf.float32, [1, 416, 416, 3])
 input_image = input_image / 255.
@@ -55,7 +55,7 @@ saver.restore(sess, "./data/checkpoint/yolov2.ckpt-0")
 
 net_out = sess.run(y_pred, feed_dict={input_image:np.expand_dims(image, 0)})
 net_out = net_out[0]
-boxes  = raw_utils.decode_netout(net_out, anchors, 20, 0.0, 0.0)
+boxes  = raw_utils.decode_netout(net_out, anchors, 20, 0., 0.0)
 
 image = raw_utils.draw_boxes(image, boxes, CLASSES)
 

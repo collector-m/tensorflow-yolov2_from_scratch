@@ -29,13 +29,14 @@ NUM_CLASSES      = len(CLASSES)
 CLASS_WEIGHTS    = np.ones(NUM_CLASSES, dtype='float32')
 TRUE_BOX_BUFFER  = 80
 
+test_tfrecord = "./test_data/train0003.tfrecords"
 train_tfrecord = "../voc/train*.tfrecords"
 val_tfrecord   = "../voc/val*.tfrecords"
 sess = tf.Session()
 parser = parser(IMAGE_H, IMAGE_W, GRID_H, GRID_W, ANCHORS, NUM_CLASSES, TRUE_BOX_BUFFER, DEBUG=False)
 
-trainset = dataset(parser, train_tfrecord, BATCH_SIZE, shuffle=1)
-valset   = dataset(parser, val_tfrecord,   BATCH_SIZE, shuffle=None)
+trainset = dataset(parser, test_tfrecord, BATCH_SIZE, shuffle=1)
+valset   = dataset(parser, test_tfrecord,   BATCH_SIZE, shuffle=None)
 
 is_training = tf.placeholder(tf.bool)
 example = tf.cond(is_training, lambda: trainset.get_next(), lambda: valset.get_next())
@@ -55,12 +56,16 @@ features = feature_extractor.feature
 # ========================> method 2 <================================
 
 input_num_filter = features.shape[-1].value
+# filter_weight = tf.get_variable('weight', [1, 1, input_num_filter, NUM_ANCHORS*(5+NUM_CLASSES)],
+                                # initializer=tf.truncated_normal_initializer(stddev=1))
 filter_weight = tf.get_variable('weight', [1, 1, input_num_filter, NUM_ANCHORS*(5+NUM_CLASSES)],
-                                initializer=tf.truncated_normal_initializer(stddev=1))
+                                initializer=tf.random_normal_initializer())
 filter_weight = filter_weight / (GRID_H*GRID_W)
 
+# biases = tf.get_variable('biases', [NUM_ANCHORS*(5+NUM_CLASSES)],
+                         # initializer=tf.truncated_normal_initializer(stddev=1))
 biases = tf.get_variable('biases', [NUM_ANCHORS*(5+NUM_CLASSES)],
-                         initializer=tf.truncated_normal_initializer(stddev=1))
+                         initializer=tf.random_normal_initializer())
 biases = biases / (GRID_H*GRID_W)
 output = tf.nn.conv2d(features, filter_weight, strides=[1, 1, 1, 1], padding='SAME')
 output = tf.nn.bias_add(output, biases)

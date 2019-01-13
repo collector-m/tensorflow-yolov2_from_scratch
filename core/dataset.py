@@ -101,6 +101,11 @@ class parser(object):
 
                 b_batch[0, 0, 0, i] = box
 
+                print("=> grid_y, grid_x" , grid_y, grid_x)
+                print("=> best_anchor , best iou", best_anchor, np.max(iou))
+                print("=> cls id", cls_idx )
+                print("=> box", box)
+
         return y_batch, b_batch
 
 
