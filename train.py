@@ -56,11 +56,11 @@ features = feature_extractor.feature
 
 input_num_filter = features.shape[-1].value
 filter_weight = tf.get_variable('weight', [1, 1, input_num_filter, NUM_ANCHORS*(5+NUM_CLASSES)],
-                                initializer=tf.truncated_normal_initializer(stddev=0.1))
+                                initializer=tf.truncated_normal_initializer(stddev=1))
 filter_weight = filter_weight / (GRID_H*GRID_W)
 
 biases = tf.get_variable('biases', [NUM_ANCHORS*(5+NUM_CLASSES)],
-                         initializer=tf.truncated_normal_initializer(stddev=0.1))
+                         initializer=tf.truncated_normal_initializer(stddev=1))
 biases = biases / (GRID_H*GRID_W)
 output = tf.nn.conv2d(features, filter_weight, strides=[1, 1, 1, 1], padding='SAME')
 output = tf.nn.bias_add(output, biases)
